@@ -1,5 +1,6 @@
 package com.hust.ofornet.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,24 +86,24 @@ public class JobServiceImpl implements JobService{
 	}
 	
 	@Override
-	public List listByCategory(int cid) {
+	public List<Job> listByCategory(int cid) {
 		// TODO Auto-generated method stub
 		JobExample example = new JobExample();
         example.createCriteria().andCidEqualTo(cid);
         example.setOrderByClause("id desc");
-        List result = jobMapper.selectByExample(example);
+        List<Job> result = jobMapper.selectByExample(example);
         setCategory(result);
         setCompany(result);
 		return result;
 	}
 	
 	@Override
-	public List listByCompany(int coid) {
+	public List<Job> listByCompany(int coid) {
 		// TODO Auto-generated method stub
 		JobExample example = new JobExample();
         example.createCriteria().andCidEqualTo(coid);
         example.setOrderByClause("id desc");
-        List result = jobMapper.selectByExample(example);
+        List<Job> result = jobMapper.selectByExample(example);
         setCategory(result);
         setCompany(result);
 		return result;
@@ -113,10 +114,54 @@ public class JobServiceImpl implements JobService{
 		// TODO Auto-generated method stub
 		JobExample example = new JobExample();
         example.setOrderByClause("id desc");
-        List result = jobMapper.selectByExample(example);
+        List<Job> result = jobMapper.selectByExample(example);
         setCategory(result);
         setCompany(result);
 		return result;
 	}
+
+	@Override
+	public void fill(List<Category> cs) {
+		for (Category c : cs) {
+            fill(c);
+        }
+	}
+
+	@Override
+	public void fill(Category c) {
+		// TODO Auto-generated method stub
+		List<Job> jobs = list(c.getId());
+        c.setJobs(jobs);
+	}
+	
+	@Override
+	public List<Job> list(int id) {
+		// TODO Auto-generated method stub
+		JobExample example = new JobExample();
+		example.createCriteria().andCidEqualTo(id);
+		example.setOrderByClause("id desc");
+		List<Job> result = jobMapper.selectByExample(example);
+		setCategory(result);
+		setCompany(result);
+		return result;
+	}
+	@Override
+	public void fillByRow(List<Category> cs) {
+		// TODO Auto-generated method stub
+		int jobNumberEachRow = 8;
+        for (Category c : cs) {
+            List<Job> jobs =  c.getJobs();
+            List<List<Job>> productsByRow =  new ArrayList<>();
+            for (int i = 0; i < jobs.size(); i+=jobNumberEachRow) {
+                int size = i+jobNumberEachRow;
+                size= size>jobs.size()?jobs.size():size;
+                List<Job> productsOfEachRow =jobs.subList(i, size);
+                productsByRow.add(productsOfEachRow);
+            }
+            c.setJobsByRow(productsByRow);
+        }
+	}
+
+	
 
 }
